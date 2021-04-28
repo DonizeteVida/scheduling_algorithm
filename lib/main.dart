@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:scheduling_algorithm/core/algorithm/fifo_schedule.dart';
 import 'package:scheduling_algorithm/core/algorithm/model/schedule_time.dart';
+import 'package:scheduling_algorithm/core/algorithm/round_robin_schedule.dart';
 import 'package:scheduling_algorithm/core/algorithm/schedule.dart';
 import 'package:scheduling_algorithm/core/model/task/result/history_type.dart';
 import 'package:scheduling_algorithm/core/model/task/result/task_history.dart';
@@ -38,9 +39,17 @@ class _HomePageState extends State<HomePage> {
   List<TaskResult> generateTaskResult(int until) {
     final tasks = [Task("A", 8), Task("B", 6), Task("C", 4)];
 
-    final Schedule schedule = FifoSchedule(tasks: tasks);
+    final Schedule schedule;
+    if (true) {
+      schedule = RoundRobinSchedule(2, tasks);
+    } else {
+      schedule = FifoSchedule(tasks);
+    }
+
     final List<TaskResult> taskResult =
         schedule.start(ScheduleTime.finite(until));
+
+    taskResult.sort((t1, t2) => t1.name.compareTo(t2.name));
 
     return taskResult;
   }
@@ -52,7 +61,7 @@ class _HomePageState extends State<HomePage> {
           ...taskResult.history.map((TaskHistory e) {
             Color color;
             if (e.historyType == HistoryType.QUEUE) {
-              color = Colors.white;
+              color = Colors.blue;
             } else {
               color = Colors.black;
             }
@@ -82,7 +91,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    Timer.periodic(Duration(milliseconds: 500), (_) => inc());
+    Timer.periodic(Duration(seconds: 1), (_) => inc());
     super.initState();
   }
 

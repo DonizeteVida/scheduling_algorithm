@@ -39,7 +39,12 @@ abstract class Schedule with TaskHistoryMixinGenerator {
 
   ///Called when schedule finish for some reason.
   ///Or when task queue is empty, or schedule time is over
-  void onScheduleFinish() {}
+  ///If we have tasks, we extract their historic
+  void onScheduleFinish() {
+    taskQueue.forEach((e) {
+      removeTaskAndAddHistory(e);
+    });
+  }
 
   void onUpdateTaskQueue() {}
 

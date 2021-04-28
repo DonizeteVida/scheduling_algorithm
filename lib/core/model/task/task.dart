@@ -4,17 +4,33 @@ class Task {
   final String name;
   final List<TaskHistory> taskHistoryList = [];
 
-  ///To control task size on processor
   final int size;
-  int _consumedSize = 0;
 
-  Task(this.name, this.size);
+  int _sizeControl;
+  int _consumedControl;
+
+  Task(this.name, this.size)
+      : this._sizeControl = size,
+        this._consumedControl = 0;
 
   void addHistory(TaskHistory taskHistory) => taskHistoryList.add(taskHistory);
 
+  ///
   void consume() {
-    _consumedSize++;
+    _consumedControl++;
   }
 
-  bool isReady() => _consumedSize >= size;
+  int getConsumed() {
+    return _consumedControl;
+  }
+
+  void resetConsumed() {
+    _consumedControl = 0;
+  }
+
+  void eatSize(int size) {
+    _sizeControl -= size;
+  }
+
+  bool isReady() => _consumedControl >= _sizeControl;
 }
