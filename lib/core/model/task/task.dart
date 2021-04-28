@@ -7,30 +7,34 @@ class Task {
   final int size;
 
   int _sizeControl;
-  int _consumedControl;
+  int _workControl;
 
   Task(this.name, this.size)
       : this._sizeControl = size,
-        this._consumedControl = 0;
+        this._workControl = 0;
 
   void addHistory(TaskHistory taskHistory) => taskHistoryList.add(taskHistory);
 
-  ///
-  void consume() {
-    _consumedControl++;
+  ///Work consumes 1 unit of workControl.
+  ///We will use it to know if task is complete
+  void work() {
+    _workControl++;
   }
 
-  int getConsumed() {
-    return _consumedControl;
+  int getWork() {
+    return _workControl;
   }
 
-  void resetConsumed() {
-    _consumedControl = 0;
+  void resetWork() {
+    _workControl = 0;
   }
 
-  void eatSize(int size) {
+  ///Instead work, we remove size.
+  ///8 - 4 is same 4 - 0, where result is how much I have to work.
+  ///This logical afects how isComplete works. This is the intention
+  void removeSize(int size) {
     _sizeControl -= size;
   }
 
-  bool isReady() => _consumedControl >= _sizeControl;
+  bool isComplete() => _workControl >= _sizeControl;
 }

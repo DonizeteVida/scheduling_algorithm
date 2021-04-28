@@ -23,7 +23,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: HomePage(),
+      home: Scaffold(
+        body: HomePage(),
+      ),
     );
   }
 }
@@ -37,11 +39,12 @@ class _HomePageState extends State<HomePage> {
   int until = 0;
 
   List<TaskResult> generateTaskResult(int until) {
-    final tasks = [Task("A", 8), Task("B", 6), Task("C", 4)];
+    final tasks = List.generate(
+        15, (index) => Task(String.fromCharCode(index), index + 2));
 
     final Schedule schedule;
     if (true) {
-      schedule = RoundRobinSchedule(2, tasks);
+      schedule = RoundRobinSchedule(3, tasks);
     } else {
       schedule = FifoSchedule(tasks);
     }
@@ -65,10 +68,22 @@ class _HomePageState extends State<HomePage> {
             } else {
               color = Colors.black;
             }
-            return Container(
-              color: color,
-              width: 50,
-              margin: EdgeInsets.all(1),
+            return GestureDetector(
+              child: Container(
+                color: color,
+                width: 15,
+                margin: EdgeInsets.all(1),
+              ),
+              onLongPress: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Expanded(
+                      child: Text(
+                          "Type ${e.historyType}\nTime: ${e.historyTime.startTime} - ${e.historyTime.endTime}"),
+                    ),
+                  ),
+                );
+              },
             );
           })
         ],
@@ -91,7 +106,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    Timer.periodic(Duration(seconds: 1), (_) => inc());
+    Timer.periodic(Duration(milliseconds: 50), (_) => inc());
     super.initState();
   }
 

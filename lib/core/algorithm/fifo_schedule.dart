@@ -8,8 +8,8 @@ class FifoSchedule extends Schedule {
   @override
   void execute(Task task, int time) {
     task.addHistory(generateTaskHistory(HistoryType.EXECUTING, time));
-    task.consume();
-    if (task.isReady()) {
+    task.work();
+    if (task.isComplete()) {
       removeTaskAndAddHistory(task);
     } else {
       pushStart(task);
