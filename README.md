@@ -1,9 +1,9 @@
-# Scheduling algorithm made which Flutter
+# Scheduling algorithm made with Flutter
 
 ## Project instructions
 ### Core
-> Core contains all platform independent code. ( A.K.A Dart ).
-> All flutter modules made for visual application concept will be placed on another folder
+* Core contains all platform independent code. ( A.K.A Dart ).
+* All flutter modules made for visual application concept will be placed on another folder
 
 ## Images
 ### Round robin algorithm

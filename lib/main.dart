@@ -54,7 +54,7 @@ class _HomePageState extends State<HomePage> {
     }
 
     final List<TaskResult> taskResult =
-        await schedule.start(ScheduleTime.infinite());
+        await schedule.start(ScheduleTime.finite(500));
 
     taskResult.sort((t1, t2) => t1.name.compareTo(t2.name));
 
