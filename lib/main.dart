@@ -36,21 +36,24 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int until = 0;
-
-  List<TaskResult> generateTaskResult(int until) {
-    final tasks = List.generate(
-        15, (index) => Task(String.fromCharCode(index), index + 2));
+  Future<List<TaskResult>> generateTaskResult() async {
+    final tasks = [
+      Task("A", 8),
+      Task("B", 6),
+      Task("C", 5),
+      Task("D", 3),
+      Task("E", 10),
+    ];
 
     final Schedule schedule;
     if (true) {
-      schedule = RoundRobinSchedule(3, tasks);
+      schedule = RoundRobinSchedule(2, tasks);
     } else {
       schedule = FifoSchedule(tasks);
     }
 
     final List<TaskResult> taskResult =
-        schedule.start(ScheduleTime.finite(until));
+        await schedule.start(ScheduleTime.infinite());
 
     taskResult.sort((t1, t2) => t1.name.compareTo(t2.name));
 
@@ -65,25 +68,28 @@ class _HomePageState extends State<HomePage> {
             Color color;
             if (e.historyType == HistoryType.QUEUE) {
               color = Colors.blue;
+            } else if (e.historyType == HistoryType.DESTROYED) {
+              color = Colors.red;
             } else {
               color = Colors.black;
             }
-            return GestureDetector(
-              child: Container(
-                color: color,
-                width: 15,
-                margin: EdgeInsets.all(1),
-              ),
-              onLongPress: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Expanded(
-                      child: Text(
-                          "Type ${e.historyType}\nTime: ${e.historyTime.startTime} - ${e.historyTime.endTime}"),
+            return Expanded(
+              child: GestureDetector(
+                child: Container(
+                  color: color,
+                  margin: EdgeInsets.all(1),
+                ),
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Expanded(
+                        child: Text(
+                            "Type ${e.historyType}\nTime: ${e.historyTime.startTime} - ${e.historyTime.endTime}"),
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             );
           })
         ],
@@ -91,30 +97,32 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget generateWidget(int until) {
-    final taskResultList = generateTaskResult(until);
+  Future<Widget> generateWidget() async {
+    final taskResultList = await generateTaskResult();
     return Column(
       children: [...taskResultList.map(generateRow)],
     );
   }
 
-  void inc() {
-    setState(() {
-      until++;
-    });
-  }
-
   @override
   void initState() {
-    Timer.periodic(Duration(milliseconds: 50), (_) => inc());
     super.initState();
+    start();
   }
+
+  Future<void> start() async {
+    Widget res = await generateWidget();
+    result = res;
+    setState(() {});
+  }
+
+  Widget? result;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       color: Colors.white,
-      child: generateWidget(until),
+      child: result == null ? Container() : result,
     );
   }
 }

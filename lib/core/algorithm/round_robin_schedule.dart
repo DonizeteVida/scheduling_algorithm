@@ -1,5 +1,4 @@
 import 'package:scheduling_algorithm/core/algorithm/schedule.dart';
-import 'package:scheduling_algorithm/core/model/task/result/history_type.dart';
 import 'package:scheduling_algorithm/core/model/task/task.dart';
 
 class RoundRobinSchedule extends Schedule {
@@ -7,15 +6,14 @@ class RoundRobinSchedule extends Schedule {
   RoundRobinSchedule(this.quantum, List<Task> task) : super(task);
 
   @override
-  void execute(Task task, int time) {
-    task.addHistory(generateTaskHistory(HistoryType.EXECUTING, time));
-    task.work();
+  Future<void> execute(Task task, int time) async {
+    super.execute(task, time);
     //means that we have done our quantum job
     if (task.getWork() >= quantum || task.isComplete()) {
       task.resetWork();
       task.removeSize(quantum);
       if (task.isComplete()) {
-        removeTaskAndAddHistory(task);
+        await removeTaskToFinishedTaskQueue(task, time);
       } else {
         //If we have done on work, but is not complete yet, we will to end of task queue
         pushEnd(task);

@@ -11,5 +11,6 @@ enum HistoryType {
   //Just for better UI generation
   //We use to fix task result size
   //If task end with 8 size, but another has like 20, we will fill 12 with undefined
-  UNDEFINED
+  UNDEFINED,
+  DESTROYED,
 }

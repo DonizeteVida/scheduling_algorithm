@@ -11,10 +11,11 @@ void main() {
   pMain.main();
 }
 
-void fifoSchedule() {
+void fifoSchedule() async {
   final tasks = [Task("A", 8), Task("B", 6), Task("C", 4)];
 
   final Schedule schedule = FifoSchedule(tasks);
-  final List<TaskResult> taskResult = schedule.start(ScheduleTime.infinite());
+  final List<TaskResult> taskResult =
+      await schedule.start(ScheduleTime.infinite());
   print(taskResult);
 }

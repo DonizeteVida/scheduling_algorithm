@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:scheduling_algorithm/core/algorithm/model/schedule_time.dart';
 import 'package:scheduling_algorithm/core/model/task/result/history_time.dart';
 import 'package:scheduling_algorithm/core/model/task/result/history_type.dart';
@@ -13,51 +14,73 @@ import 'package:scheduling_algorithm/core/model/task/task.dart';
 abstract class Schedule with TaskHistoryMixinGenerator {
   List<Task> taskQueue;
   final List<TaskResult> taskResultQueue = [];
+  final List<Task> finishedTasksQueue = [];
 
   Schedule(this.taskQueue);
 
   ///Start some schedule algorithm
-  List<TaskResult> start(ScheduleTime scheduleTime) {
+  Future<List<TaskResult>> start(ScheduleTime scheduleTime) async {
     int time = 0;
     while (taskQueue.isNotEmpty && time < scheduleTime.until) {
       Task? task = popStart();
 
       //This will never happen, because I ask on while, I hope
       if (task == null) continue;
-      updateTaskQueue(time);
-      onUpdateTaskQueue();
-      execute(task, time++);
+      await updateQueues(time);
+      await onUpdateTaskQueue();
+      await execute(task, time++);
     }
-    onScheduleFinish();
+    await onScheduleFinish();
     return taskResultQueue;
   }
 
   ///This method remove the first task on queue and give it to algorithm handle it.
   ///I think this is universal.
   ///Algorithm have to put this task on queue or taskResult queue when task finish your work
-  void execute(Task task, int time);
+  @mustCallSuper
+  Future<void> execute(Task task, int time) async {
+    task.addHistory(generateTaskHistory(HistoryType.EXECUTING, time));
+    if (task.startTime <= 0) task.startTime = time;
+    task.work();
+  }
 
   ///Called when schedule finish for some reason.
   ///Or when task queue is empty, or schedule time is over
   ///If we have tasks, we extract their historic
-  void onScheduleFinish() {
-    taskQueue.forEach((e) {
-      removeTaskAndAddHistory(e);
+  Future<void> onScheduleFinish() async {
+    final Iterable<Future> future1 = taskQueue.map((e) async {
+      await removeTaskAndAddHistory(e);
     });
+    final Iterable<Future> future2 = finishedTasksQueue.map((e) async {
+      await removeTaskAndAddHistory(e);
+    });
+    await Future.wait([Future.wait(future1), Future.wait(future2)]);
   }
 
-  void onUpdateTaskQueue() {}
+  Future<void> onUpdateTaskQueue() async {}
 
   ///May be overrided to update virtual or IO queue
-  void updateTaskQueue(int time) {
-    addHistoryToEachTaskInList(taskQueue, HistoryType.QUEUE, time);
+  Future<void> updateQueues(
+    int time,
+  ) async {
+    final future1 =
+        addHistoryToEachTaskInList(taskQueue, HistoryType.QUEUE, time);
+    final future2 = addHistoryToEachTaskInList(
+        finishedTasksQueue, HistoryType.DESTROYED, time);
+    await Future.wait([future1, future2]);
   }
 
-  void addHistoryToEachTaskInList(
-      List<Task> task, HistoryType historyType, int time) {
-    task.forEach((t) {
-      t.addHistory(generateTaskHistory(historyType, time));
+  Future<void> addHistoryToEachTaskInList(
+    List<Task> task,
+    HistoryType historyType,
+    int time,
+  ) async {
+    final Iterable<Future<Null>> futures = task.map((t) async {
+      t.addHistory(
+        generateTaskHistory(historyType, time),
+      );
     });
+    await Future.wait(futures);
   }
 
   Task? popStart() => _removeTaskAt(0);
@@ -86,8 +109,13 @@ abstract class Schedule with TaskHistoryMixinGenerator {
     return newSize > oldSize;
   }
 
-  void removeTaskAndAddHistory(Task task) {
+  Future<void> removeTaskAndAddHistory(Task task) async {
     taskResultQueue.add(TaskResult.fromTask(task));
+  }
+
+  Future<void> removeTaskToFinishedTaskQueue(Task task, int endTime) async {
+    task.endTime = endTime;
+    finishedTasksQueue.add(task);
   }
 
   List<Task> getAllTasks() {
