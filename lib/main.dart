@@ -40,21 +40,21 @@ class _HomePageState extends State<HomePage> {
     final tasks = [
       Task("A", 8),
       Task("B", 6),
-      Task("C", 5),
-      Task("D", 3),
+      Task("C", 4),
+      Task("D", 2),
       Task("E", 10),
       Task("F", 2)
     ];
 
     final Schedule schedule;
-    if (false) {
+    if (true) {
       schedule = RoundRobinSchedule(2, tasks);
     } else {
       schedule = FifoSchedule(tasks);
     }
 
     final List<TaskResult> taskResult =
-        await schedule.start(ScheduleTime.finite(500));
+        await schedule.start(ScheduleTime.infinite());
 
     taskResult.sort((t1, t2) => t1.name.compareTo(t2.name));
 

@@ -1,7 +1,7 @@
 //Have to be passed as param to schedule algorithm, this will be more used
 //on play pause chart representation
 abstract class ScheduleTime {
-  int until;
+  final int until;
   ScheduleTime(this.until);
 
   factory ScheduleTime.finite(int until) => Finite(until);

@@ -5,12 +5,12 @@ class FifoSchedule extends Schedule {
   FifoSchedule(List<Task> tasks) : super(tasks);
 
   @override
-  Future<void> execute(Task task, int time) async {
+  Future<bool> execute(Task task, int time) async {
     super.execute(task, time);
     if (task.isComplete()) {
       await removeTaskToFinishedTaskQueue(task, time);
-    } else {
-      pushStart(task);
+      return true;
     }
+    return false;
   }
 }

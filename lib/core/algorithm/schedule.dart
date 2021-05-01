@@ -21,14 +21,22 @@ abstract class Schedule with TaskHistoryMixinGenerator {
   ///Start some schedule algorithm
   Future<List<TaskResult>> start(ScheduleTime scheduleTime) async {
     int time = 0;
-    while (taskQueue.isNotEmpty && time < scheduleTime.until) {
-      Task? task = popStart();
+    Task? processorTask;
+
+    while (taskQueue.isNotEmpty && time < scheduleTime.until ||
+        processorTask != null) {
+      if (processorTask == null) {
+        processorTask = popStart();
+      }
 
       //This will never happen, because I ask on while, I hope
-      if (task == null) continue;
+      if (processorTask == null) continue;
       await updateQueues(time);
       await onUpdateTaskQueue();
-      await execute(task, time++);
+      bool removeFromProcessor = await execute(processorTask, time++);
+      if (removeFromProcessor) {
+        processorTask = null;
+      }
     }
     await onScheduleFinish();
     return taskResultQueue;
@@ -36,12 +44,14 @@ abstract class Schedule with TaskHistoryMixinGenerator {
 
   ///This method remove the first task on queue and give it to algorithm handle it.
   ///I think this is universal.
-  ///Algorithm have to put this task on queue or taskResult queue when task finish your work
+  ///Algorithm have to put this task on queue or taskResult queue when task finish your work.
+  ///Must return true to remove task from processor
   @mustCallSuper
-  Future<void> execute(Task task, int time) async {
+  Future<bool> execute(Task task, int time) async {
     task.addHistory(generateTaskHistory(HistoryType.EXECUTING, time));
     if (task.startTime <= 0) task.startTime = time;
     task.work();
+    return false;
   }
 
   ///Called when schedule finish for some reason.

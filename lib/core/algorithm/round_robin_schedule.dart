@@ -6,7 +6,7 @@ class RoundRobinSchedule extends Schedule {
   RoundRobinSchedule(this.quantum, List<Task> task) : super(task);
 
   @override
-  Future<void> execute(Task task, int time) async {
+  Future<bool> execute(Task task, int time) async {
     super.execute(task, time);
     //means that we have done our quantum job
     if (task.getWork() >= quantum || task.isComplete()) {
@@ -18,9 +18,8 @@ class RoundRobinSchedule extends Schedule {
         //If we have done on work, but is not complete yet, we will to end of task queue
         pushEnd(task);
       }
-    } else {
-      //If out amount of work is not completed, we keeps on start of task queue
-      pushStart(task);
+      return true;
     }
+    return false;
   }
 }
