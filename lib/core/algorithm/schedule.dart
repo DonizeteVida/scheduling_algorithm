@@ -30,7 +30,8 @@ abstract class Schedule with TaskHistoryMixinGenerator {
       }
 
       //This will never happen, because I ask on while, I hope
-      if (processorTask == null) continue;
+      if (processorTask == null)
+        throw "Processor task must no be null. Revise your code !!!";
       await updateQueues(time);
       await onUpdateTaskQueue();
       bool removeFromProcessor = await execute(processorTask, time++);

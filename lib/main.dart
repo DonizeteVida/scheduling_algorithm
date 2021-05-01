@@ -47,7 +47,7 @@ class _HomePageState extends State<HomePage> {
     ];
 
     final Schedule schedule;
-    if (true) {
+    if (false) {
       schedule = RoundRobinSchedule(2, tasks);
     } else {
       schedule = FifoSchedule(tasks);
