@@ -43,10 +43,11 @@ class _HomePageState extends State<HomePage> {
       Task("C", 5),
       Task("D", 3),
       Task("E", 10),
+      Task("F", 2)
     ];
 
     final Schedule schedule;
-    if (true) {
+    if (false) {
       schedule = RoundRobinSchedule(2, tasks);
     } else {
       schedule = FifoSchedule(tasks);
